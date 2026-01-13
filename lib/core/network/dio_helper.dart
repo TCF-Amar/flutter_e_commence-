@@ -13,12 +13,13 @@ class DioHelper {
     required String url,
     required ApiMethod method,
     Map<String, dynamic>? headers,
+
     Map<String, dynamic>? queryParameters,
     dynamic body,
   }) async {
     try {
       if (kDebugMode) {
-        debugPrint('📡 ${method.name.toUpperCase()} $url');
+        debugPrint('${method.name.toUpperCase()} $url');
         if (queryParameters != null) {
           debugPrint('Query: $queryParameters');
         }
@@ -35,19 +36,18 @@ class DioHelper {
       );
 
       if (kDebugMode) {
-        debugPrint('✅ ${response.statusCode} $url');
+        debugPrint('${response.statusCode} $url');
       }
 
       return response;
     } on DioException catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ Error on $url: ${e.message}');
+        debugPrint('Error on $url: ${e.message}');
       }
       rethrow;
     }
   }
 
-  /// Convenience method for GET requests
   Future<Response<T>> get<T>(
     String url, {
     Map<String, dynamic>? queryParameters,
@@ -62,7 +62,6 @@ class DioHelper {
   }
 
   /*
-  /// Convenience method for POST requests
   Future<Response<T>> post<T>(
     String url, {
     dynamic body,
@@ -78,7 +77,6 @@ class DioHelper {
     );
   }
 
-  /// Convenience method for PUT requests
   Future<Response<T>> put<T>(
     String url, {
     dynamic body,
@@ -94,7 +92,6 @@ class DioHelper {
     );
   }
 
-  /// Convenience method for DELETE requests
   Future<Response<T>> delete<T>(
     String url, {
     dynamic body,
@@ -110,7 +107,6 @@ class DioHelper {
     );
   }
 
-  /// Convenience method for PATCH requests
   Future<Response<T>> patch<T>(
     String url, {
     dynamic body,

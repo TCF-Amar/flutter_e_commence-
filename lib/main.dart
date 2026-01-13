@@ -8,7 +8,7 @@ import 'package:flutter_commerce/core/widgets/app_snackbar.dart';
 import 'package:get/get.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import "package:flutter_commerce/core/DI/dependency_injection.dart";
+import "package:flutter_commerce/core/DI/di.dart";
 
 void main() async {
   //! Ensure Flutter engine is fully initialized
@@ -31,11 +31,13 @@ void main() async {
   final authNotifier = AuthNotifier(storage);
 
   //* Initialize DependenciesInjection
-  DependenciesInjection.init();
+  AppDI.init();
 
   //* Run the app
   runApp(App(storage: storage, authNotifier: authNotifier));
 }
+
+//! mason make clean_feature --name <feature_name>
 
 class App extends StatelessWidget {
   final AppStorage storage;

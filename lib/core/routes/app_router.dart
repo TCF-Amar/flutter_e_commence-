@@ -1,8 +1,7 @@
 import 'package:flutter_commerce/core/routes/auth_notifier.dart';
 import 'package:flutter_commerce/core/storage/app_storage.dart';
-import 'package:flutter_commerce/modules/auth/login/login_screen.dart';
-import '../../modules/home/home_di.dart';
-import '../../modules/home/home_screen.dart';
+import 'package:flutter_commerce/features/auth/presentation/screens/login_screen.dart';
+import 'package:flutter_commerce/features/home/presentation/screens/home_page.dart';
 import './app_routes.dart';
 import 'package:go_router/go_router.dart';
 
@@ -47,7 +46,7 @@ class AppRouter {
           name: AppRoutes.home.name,
           path: AppRoutes.home.path,
           builder: (context, state) {
-            HomeDI().dependencies();
+            // HomeDI().dependencies();
             return HomeScreen();
           },
         ),
