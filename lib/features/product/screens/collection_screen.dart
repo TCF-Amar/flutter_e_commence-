@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_commerce/core/theme/theme_extensions.dart';
+import 'package:flutter_commerce/core/widgets/app_product_card.dart';
 import 'package:flutter_commerce/core/widgets/app_text.dart';
 import 'package:flutter_commerce/features/home/widgets/home_search_bar.dart';
+import 'package:flutter_commerce/features/product/widgets/list_all__product.dart';
 import 'package:get/get.dart';
 import 'package:flutter_commerce/features/product/controllers/product_controller.dart';
 
@@ -33,18 +35,19 @@ class CollectionScreen extends GetView<ProductController> {
               HomeSearchBar(),
               Expanded(
                 child: Obx(() {
-                  return controller.filteredProducts.isEmpty
-                      ? const Center(child: Text('No products found'))
-                      : ListView.builder(
-                          itemCount: controller.filteredProducts.length,
-                          itemBuilder: (context, index) {
-                            final product = controller.filteredProducts[index];
-                            return ListTile(
-                              title: Text(product.title),
-                              subtitle: Text(product.category),
-                            );
-                          },
-                        );
+                  if (controller.isLoading.value) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (controller.filteredProducts.isEmpty) {
+                    return ListAllProduct();
+                  }
+                  return ListView.builder(
+                    itemCount: controller.filteredProducts.length,
+                    itemBuilder: (context, index) {
+                      final product = controller.filteredProducts[index];
+                      return AppProductCard(product: product);
+                    },
+                  );
                 }),
               ),
             ],

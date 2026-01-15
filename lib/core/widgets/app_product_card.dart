@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_commerce/core/theme/theme_extensions.dart';
 import 'package:flutter_commerce/features/product/models/product_model.dart';
 
 import 'app_button.dart';
@@ -15,7 +16,7 @@ class AppProductCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colorScheme.card,
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
           BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
@@ -117,7 +118,7 @@ class AppProductCard extends StatelessWidget {
                     child: AppText(
                       product.title,
                       maxLines: 1,
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

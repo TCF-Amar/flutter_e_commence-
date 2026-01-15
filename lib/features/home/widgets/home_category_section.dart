@@ -1,8 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_commerce/core/constants/colors/app_color_scheme.dart';
 import 'package:flutter_commerce/core/routes/app_routes.dart';
-// import 'package:flutter_commerce/features/dashboard/controllers/dashboard_controller.dart';
+import 'package:flutter_commerce/core/theme/theme_extensions.dart';
 import 'package:get/get.dart';
 import 'package:flutter_commerce/features/home/controllers/home_controller.dart';
 import 'package:flutter_commerce/core/widgets/app_text.dart';
@@ -15,7 +14,6 @@ class HomeCategorySection extends GetView<HomeController> {
   Widget build(BuildContext context) {
     // final DashboardController dashboardController = Get.find();
 
-    final colorScheme = Theme.of(context).extension<AppColorScheme>()!;
     return Obx(() {
       final categories = controller.productController.categoryList;
 
@@ -26,17 +24,33 @@ class HomeCategorySection extends GetView<HomeController> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: AppText(
-              'Categories',
-              uppercase: true,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                const AppText(
+                  'Categories',
+                  // uppercase: true,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+                const Spacer(),
+                TextButton(
+                  onPressed: () {
+                    context.pushNamed(AppRoutes.catagory.name);
+                  },
+                  child: AppText(
+                    'See All',
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: context.textColors.link,
+                  ),
+                ),
+              ],
             ),
           ),
           SizedBox(
-            height: 50,
+            height: 40,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -45,25 +59,18 @@ class HomeCategorySection extends GetView<HomeController> {
                 final category = categories[index];
                 return GestureDetector(
                   onTap: () {
-                    // // Set the selected category for filtering
-                    // controller.productController.selectedCategory.value =
-                    //     category;
-
-                    // // Switch to Collections tab
-                    // dashboardController.changeTab(1);
-
                     context.pushNamed(
                       AppRoutes.catagory.name,
                       queryParameters: {'category': category},
                     );
                   },
                   child: Container(
-                    height: 50,
+                    height: 40,
                     width: double.tryParse((category.length * 13).toString()),
                     margin: const EdgeInsets.only(right: 16),
                     decoration: BoxDecoration(
-                      color: colorScheme.surface,
-                      borderRadius: BorderRadius.circular(50),
+                      color: context.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(18),
                     ),
                     child: Stack(
                       children: [
@@ -73,7 +80,7 @@ class HomeCategorySection extends GetView<HomeController> {
                           right: 0,
                           bottom: 0,
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(50),
+                            borderRadius: BorderRadius.circular(18),
                             child: CachedNetworkImage(
                               imageUrl: "https://picsum.photos/200/300",
                               fit: BoxFit.cover,
@@ -91,14 +98,14 @@ class HomeCategorySection extends GetView<HomeController> {
                           right: 0,
                           bottom: 0,
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(50),
+                            borderRadius: BorderRadius.circular(18),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
                               ),
                               decoration: BoxDecoration(
                                 color: Colors.black.withValues(alpha: 0.5),
-                                borderRadius: BorderRadius.circular(50),
+                                borderRadius: BorderRadius.circular(18),
                               ),
                             ),
                           ),
@@ -109,13 +116,13 @@ class HomeCategorySection extends GetView<HomeController> {
                           right: 0,
                           bottom: 0,
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(50),
+                            borderRadius: BorderRadius.circular(18),
                             child: Center(
                               child: AppText(
                                 "${category.capitalizeFirst}",
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: colorScheme.surface,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: context.colorScheme.surface,
                               ),
                             ),
                           ),

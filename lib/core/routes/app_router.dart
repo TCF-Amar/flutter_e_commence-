@@ -5,6 +5,7 @@ import 'package:flutter_commerce/features/dashboard/screens/dashboard_screen.dar
 import 'package:flutter_commerce/features/product/screens/category_screen.dart';
 import 'package:flutter_commerce/features/product/screens/collection_screen.dart';
 import 'package:flutter_commerce/features/product/screens/search_screen.dart';
+import 'package:flutter_commerce/features/settings/screens/settings_screen.dart';
 import 'package:flutter_commerce/features/splash/screens/splash_screen.dart';
 import './app_routes.dart';
 import 'package:go_router/go_router.dart';
@@ -71,7 +72,7 @@ class AppRouter {
           builder: (context, state) {
             // HomeDI().dependencies();
             return CategoryScreen(
-              category: state.uri.queryParameters['category']!,
+              category: state.uri.queryParameters['category'] ?? "",
             );
           },
         ),
@@ -117,13 +118,13 @@ class AppRouter {
         //     return const ProfileScreen();
         //   },
         // ),
-        // GoRoute(
-        //   name: AppRoutes.settings.name,
-        //   path: AppRoutes.settings.path,
-        //   builder: (context, state) {
-        //     return const SettingsScreen();
-        //   },
-        // ),
+        GoRoute(
+          name: AppRoutes.settings.name,
+          path: AppRoutes.settings.path,
+          builder: (context, state) {
+            return const SettingsScreen();
+          },
+        ),
         // GoRoute(
         //   name: AppRoutes.wishlist.name,
         //   path: AppRoutes.wishlist.path,

@@ -3,7 +3,6 @@ import 'package:flutter_commerce/core/error/failure.dart';
 import 'package:flutter_commerce/core/network/api_end_points.dart';
 import 'package:flutter_commerce/core/network/dio_helper.dart';
 
-import 'package:flutter_commerce/features/product/datasource/product_remote_data_source.dart';
 import 'package:flutter_commerce/features/product/models/product_model.dart';
 import 'package:flutter_commerce/features/product/repositories/product_repository.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -23,7 +22,7 @@ void main() {
 
   setUp(() {
     mockDio = MockDio();
-    repository = ProductRepository(ProductRemoteDataSource(mockDio));
+    repository = ProductRepository(mockDio);
   });
 
   group('ProductRepository - getProducts', () {

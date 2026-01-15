@@ -1,24 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_commerce/core/storage/app_storage.dart';
 import 'package:get/get.dart';
-// import 'package:get_storage/get_storage.dart';
 
 class ThemeController extends GetxController {
-  // final _box = GetStorage();
-
-  final Rx<ThemeMode> themeMode = ThemeMode.light.obs;
+  final AppStorage storage = Get.find<AppStorage>();
+  final Rx<ThemeMode> themeMode = ThemeMode.system.obs;
 
   @override
   void onInit() {
     super.onInit();
-    // final isDark = _box.read('isDark') ?? false;
-    themeMode.value = ThemeMode.dark;
+    themeMode.value = storage.themeMode.value;
     Get.changeThemeMode(themeMode.value);
   }
 
   void toggleTheme() {
-    themeMode.value = themeMode.value == ThemeMode.dark
+    themeMode.value = themeMode.value == ThemeMode.system
         ? ThemeMode.light
         : ThemeMode.dark;
     Get.changeThemeMode(themeMode.value);
+    storage.setThemeMode(themeMode.value);
+  }
+
+  void setThemeMode(ThemeMode mode) {
+    themeMode.value = mode;
+    Get.changeThemeMode(mode);
+    storage.setThemeMode(mode);
   }
 }

@@ -8,6 +8,7 @@ import 'package:flutter_commerce/core/storage/app_storage.dart';
 import 'package:flutter_commerce/core/theme/app_theme.dart';
 import 'package:flutter_commerce/core/widgets/app_snackbar.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import "package:flutter_commerce/core/DI/di.dart";
@@ -30,6 +31,7 @@ void main() async {
   await storage.init(); //? Load data from SharedPreferences
   Get.put(storage); //? Register with GetX
 
+
   final authNotifier = AuthNotifier(storage);
 
   //* Initialize DependenciesInjection
@@ -39,27 +41,45 @@ void main() async {
   runApp(App(storage: storage, authNotifier: authNotifier));
 }
 
-class App extends StatelessWidget {
+class App extends StatefulWidget {
   final AppStorage storage;
   final AuthNotifier authNotifier;
 
-  App({super.key, required this.storage, required this.authNotifier});
+  const App({super.key, required this.storage, required this.authNotifier});
 
+  @override
+  State<App> createState() => _AppState();
+}
+
+class _AppState extends State<App> {
   final AppRouter appRouter = AppRouter();
+  late final ThemeController themeController;
+  late final GoRouter router;
+
+  @override
+  void initState() {
+    super.initState();
+    themeController = Get.find<ThemeController>();
+    router = AppRouter.router(
+      storage: widget.storage,
+      authNotifier: widget.authNotifier,
+    );
+
+    // Listen to theme changes and rebuild
+    themeController.themeMode.listen((_) {
+      if (mounted) setState(() {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
       scaffoldMessengerKey: AppSnackbar.messengerKey,
-      //? Router Configuration
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      themeMode: ThemeController().themeMode.value,
-      routerConfig: AppRouter.router(
-        storage: storage,
-        authNotifier: authNotifier,
-      ),
+      themeMode: themeController.themeMode.value,
+      routerConfig: router,
     );
   }
 }

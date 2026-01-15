@@ -92,7 +92,7 @@ class AuthController extends GetxController {
 
           //* Navigate to home page after successful login
           if (context.mounted) {
-            context.go(AppRoutes.home.path);
+            context.go(AppRoutes.dashboard.path);
           }
         },
       );

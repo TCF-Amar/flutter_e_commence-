@@ -10,29 +10,16 @@ class ProductController extends GetxController {
   final _filteredProducts = <ProductModel>[].obs;
   final _category = <String>[].obs;
   final isLoading = false.obs;
-  final selectedCategory = ''.obs; // Track selected category
 
   List<ProductModel> get products => _products;
   List<String> get categoryList => _category;
   List<ProductModel> get filteredProducts => _filteredProducts;
-
-  // Get filtered products based on selected category
-  void filterProducts() {
-    if (selectedCategory.value.isEmpty) {
-      _filteredProducts.value = products;
-    } else {
-      _filteredProducts.value = products
-          .where((product) => product.category == selectedCategory.value)
-          .toList();
-    }
-  }
 
   @override
   void onInit() {
     super.onInit();
     getProducts();
     getCategories();
-    filterProducts();
   }
 
   void getProducts() async {
