@@ -1,13 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_commerce/core/theme/theme_extensions.dart';
-import 'package:flutter_commerce/features/product/models/product_model.dart';
+import 'package:flutter_commerce/features/product/domain/entities/product.dart';
 
 import 'app_button.dart';
 import 'app_text.dart';
 
 class AppProductCard extends StatelessWidget {
-  final ProductModel product;
+  final Product product;
   final bool? isSale;
   const AppProductCard({this.isSale, super.key, required this.product});
 

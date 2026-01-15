@@ -3,10 +3,9 @@ import 'package:flutter_commerce/core/constants/colors/app_color_scheme.dart';
 import 'package:flutter_commerce/core/constants/colors/app_colors.dart';
 import 'package:flutter_commerce/core/constants/colors/app_size.dart';
 import 'package:flutter_commerce/core/widgets/app_scaffold.dart';
-import 'package:flutter_commerce/features/cart/presentation/screens/cart_screen.dart';
-import 'package:flutter_commerce/features/product/screens/collection_screen.dart';
 import 'package:flutter_commerce/features/dashboard/controllers/dashboard_controller.dart';
-import 'package:flutter_commerce/features/home/screens/home_screen.dart';
+import 'package:flutter_commerce/features/product/presentation/pages/collection_screen.dart';
+import 'package:flutter_commerce/features/home/presentation/pages/home_screen.dart';
 import 'package:flutter_commerce/features/profile/screens/profile_screen.dart';
 import 'package:flutter_commerce/features/saves/presentation/screens/saves_screen.dart';
 import 'package:get/get.dart';
@@ -21,7 +20,7 @@ class DashboardScreen extends GetView<DashboardController> {
     final tabs = [
       const HomeScreen(),
       const CollectionScreen(),
-      const CartScreen(),
+      const Text("card"),
       const SavesScreen(),
       const ProfileScreen(),
     ];
@@ -113,3 +112,4 @@ class DashboardScreen extends GetView<DashboardController> {
     );
   }
 }
+

@@ -1,10 +1,10 @@
 import 'package:flutter_commerce/core/routes/auth_notifier.dart';
 import 'package:flutter_commerce/core/storage/app_storage.dart';
-import 'package:flutter_commerce/features/auth/screens/login_screen.dart';
+import 'package:flutter_commerce/features/auth/presentation/pages/login_screen.dart';
 import 'package:flutter_commerce/features/dashboard/screens/dashboard_screen.dart';
-import 'package:flutter_commerce/features/product/screens/category_screen.dart';
-import 'package:flutter_commerce/features/product/screens/collection_screen.dart';
-import 'package:flutter_commerce/features/product/screens/search_screen.dart';
+import 'package:flutter_commerce/features/product/presentation/pages/category_screen.dart';
+import 'package:flutter_commerce/features/product/presentation/pages/collection_screen.dart';
+import 'package:flutter_commerce/features/product/presentation/pages/search_screen.dart';
 import 'package:flutter_commerce/features/settings/screens/settings_screen.dart';
 import 'package:flutter_commerce/features/splash/screens/splash_screen.dart';
 import './app_routes.dart';
