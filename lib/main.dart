@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_commerce/core/controllers/theme_controller.dart';
 import 'package:flutter_commerce/core/routes/app_router.dart';
 import 'package:flutter_commerce/core/routes/auth_notifier.dart';
 import 'package:flutter_commerce/core/storage/app_storage.dart';
+import 'package:flutter_commerce/core/theme/app_theme.dart';
 import 'package:flutter_commerce/core/widgets/app_snackbar.dart';
 import 'package:get/get.dart';
 
@@ -37,8 +39,6 @@ void main() async {
   runApp(App(storage: storage, authNotifier: authNotifier));
 }
 
-//! mason make clean_feature --name <feature_name>
-
 class App extends StatelessWidget {
   final AppStorage storage;
   final AuthNotifier authNotifier;
@@ -52,6 +52,10 @@ class App extends StatelessWidget {
     return MaterialApp.router(
       scaffoldMessengerKey: AppSnackbar.messengerKey,
       //? Router Configuration
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: ThemeController().themeMode.value,
       routerConfig: AppRouter.router(
         storage: storage,
         authNotifier: authNotifier,

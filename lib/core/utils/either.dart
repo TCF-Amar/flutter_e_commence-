@@ -1,9 +1,5 @@
 abstract class Either<L, R> {
-
-  T fold<T>(
-    T Function(L l) leftFn,
-    T Function(R r) rightFn,
-  );
+  T fold<T>(T Function(L l) leftFn, T Function(R r) rightFn);
 
   bool get isLeft => this is Left<L, R>;
   bool get isRight => this is Right<L, R>;
@@ -27,6 +23,4 @@ class Right<L, R> extends Either<L, R> {
   T fold<T>(T Function(L l) leftFn, T Function(R r) rightFn) {
     return rightFn(value);
   }
-
-
 }

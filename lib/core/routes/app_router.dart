@@ -1,7 +1,11 @@
 import 'package:flutter_commerce/core/routes/auth_notifier.dart';
 import 'package:flutter_commerce/core/storage/app_storage.dart';
-import 'package:flutter_commerce/features/auth/presentation/screens/login_screen.dart';
-import 'package:flutter_commerce/features/home/presentation/screens/home_page.dart';
+import 'package:flutter_commerce/features/auth/screens/login_screen.dart';
+import 'package:flutter_commerce/features/dashboard/screens/dashboard_screen.dart';
+import 'package:flutter_commerce/features/product/screens/category_screen.dart';
+import 'package:flutter_commerce/features/product/screens/collection_screen.dart';
+import 'package:flutter_commerce/features/product/screens/search_screen.dart';
+import 'package:flutter_commerce/features/splash/screens/splash_screen.dart';
 import './app_routes.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,7 +14,7 @@ class AppRouter {
     required AppStorage storage,
     required AuthNotifier authNotifier,
   }) {
-    final initialLocation = AppRoutes.login.path;
+    final initialLocation = AppRoutes.splash.path;
 
     return GoRouter(
       initialLocation: initialLocation,
@@ -21,13 +25,19 @@ class AppRouter {
         final isLoggedIn = storage.isLoggedIn.value;
         final hasToken = storage.token.value.isNotEmpty;
         final goingToLogin = state.matchedLocation == '/login';
+        final goingToSplash = state.matchedLocation == '/splash';
+
+        // Allow splash screen to show
+        if (goingToSplash) {
+          return null;
+        }
 
         if (!isLoggedIn || !hasToken) {
           return goingToLogin ? null : AppRoutes.login.path;
         }
 
         if (goingToLogin) {
-          return AppRoutes.home.path;
+          return AppRoutes.dashboard.path;
         }
 
         return null;
@@ -35,19 +45,97 @@ class AppRouter {
 
       routes: [
         GoRoute(
+          name: AppRoutes.splash.name,
+          path: AppRoutes.splash.path,
+          builder: (context, state) {
+            return const SplashScreen();
+          },
+        ),
+        GoRoute(
           name: AppRoutes.login.name,
           path: AppRoutes.login.path,
           builder: (context, state) {
             return const LoginScreen();
           },
         ),
-
         GoRoute(
-          name: AppRoutes.home.name,
-          path: AppRoutes.home.path,
+          name: AppRoutes.dashboard.name,
+          path: AppRoutes.dashboard.path,
+          builder: (context, state) {
+            return const DashboardScreen();
+          },
+        ),
+        GoRoute(
+          name: AppRoutes.catagory.name,
+          path: AppRoutes.catagory.path,
           builder: (context, state) {
             // HomeDI().dependencies();
-            return HomeScreen();
+            return CategoryScreen(
+              category: state.uri.queryParameters['category']!,
+            );
+          },
+        ),
+        GoRoute(
+          name: AppRoutes.product.name,
+          path: AppRoutes.product.path,
+          builder: (context, state) {
+            return const CollectionScreen();
+          },
+        ),
+        // GoRoute(
+        //   name: AppRoutes.productDetails.name,
+        //   path: AppRoutes.productDetails.path,
+        //   builder: (context, state) {
+        //     return const ProductDetailsScreen();
+        //   },
+        // ),
+        // GoRoute(
+        //   name: AppRoutes.cart.name,
+        //   path: AppRoutes.cart.path,
+        //   builder: (context, state) {
+        //     return const CartScreen();
+        //   },
+        // ),
+        // GoRoute(
+        //   name: AppRoutes.checkout.name,
+        //   path: AppRoutes.checkout.path,
+        //   builder: (context, state) {
+        //     return const CheckoutScreen();
+        //   },
+        // ),
+        // GoRoute(
+        //   name: AppRoutes.orders.name,
+        //   path: AppRoutes.orders.path,
+        //   builder: (context, state) {
+        //     return const OrdersScreen();
+        //   },
+        // ),
+        // GoRoute(
+        //   name: AppRoutes.profile.name,
+        //   path: AppRoutes.profile.path,
+        //   builder: (context, state) {
+        //     return const ProfileScreen();
+        //   },
+        // ),
+        // GoRoute(
+        //   name: AppRoutes.settings.name,
+        //   path: AppRoutes.settings.path,
+        //   builder: (context, state) {
+        //     return const SettingsScreen();
+        //   },
+        // ),
+        // GoRoute(
+        //   name: AppRoutes.wishlist.name,
+        //   path: AppRoutes.wishlist.path,
+        //   builder: (context, state) {
+        //     return const WishlistScreen();
+        //   },
+        // ),
+        GoRoute(
+          name: AppRoutes.search.name,
+          path: AppRoutes.search.path,
+          builder: (context, state) {
+            return const SearchScreen();
           },
         ),
       ],

@@ -14,7 +14,15 @@ class AppTextFormField extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final bool readOnly;
   final bool enabled;
-
+  final bool? autoFocus;
+  final bool? border;
+  // final bool? br;
+  // final bool? bt;
+  // final bool? bb;
+  // final bool? bl;
+  final double? borderRadius;
+  final double? borderWidth;
+  final Color? borderColor;
   const AppTextFormField({
     super.key,
     required this.controller,
@@ -30,6 +38,15 @@ class AppTextFormField extends StatefulWidget {
     this.onChanged,
     this.readOnly = false,
     this.enabled = true,
+    this.autoFocus = false,
+    this.border,
+    this.borderRadius,
+    this.borderWidth,
+    this.borderColor,
+    // this.br,
+    // this.bt,
+    // this.bb,
+    // this.bl,
   });
 
   @override
@@ -57,7 +74,11 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
       enabled: widget.enabled,
       onTap: widget.onTap,
       onChanged: widget.onChanged,
+      autofocus: widget.autoFocus!,
+      textAlign: TextAlign.start,
+
       decoration: InputDecoration(
+        
         hintText: widget.hint,
         labelText: widget.label,
         prefixIcon: widget.prefixIcon,
@@ -73,7 +94,34 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
                 },
               )
             : widget.suffixIcon,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(widget.borderRadius ?? 12),
+          borderSide: BorderSide(
+            color: widget.borderColor ?? Colors.grey,
+            width: widget.borderWidth ?? 1,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(widget.borderRadius ?? 12),
+          borderSide: BorderSide(
+            color: widget.borderColor ?? Colors.grey,
+            width: widget.borderWidth ?? 1,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(widget.borderRadius ?? 12),
+          borderSide: BorderSide(
+            color: widget.borderColor ?? Colors.grey,
+            width: widget.borderWidth ?? 1,
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(widget.borderRadius ?? 12),
+          borderSide: BorderSide(
+            color: widget.borderColor ?? Colors.grey,
+            width: widget.borderWidth ?? 1,
+          ),
+        ),
       ),
     );
   }

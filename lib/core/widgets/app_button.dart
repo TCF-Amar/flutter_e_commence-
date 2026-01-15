@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_commerce/core/constants/app_colors.dart';
+import 'package:flutter_commerce/core/constants/colors/app_colors.dart';
 
 enum AppButtonType { filled, outlined, text }
 
@@ -85,7 +85,7 @@ class AppButton extends StatelessWidget {
                 }
                 if (type == AppButtonType.text) return Colors.transparent;
                 if (gradient != null) return Colors.transparent;
-                return backgroundColor ?? AppColors.primaryColor;
+                return backgroundColor ?? AppColors.primary;
               }),
               foregroundColor: WidgetStateProperty.all(
                 textColor ?? Colors.white,
@@ -119,7 +119,7 @@ class AppButton extends StatelessWidget {
         child: CircularProgressIndicator(
           strokeWidth: 2,
           valueColor: AlwaysStoppedAnimation<Color>(
-            textColor ?? AppColors.primaryColor,
+            textColor ?? AppColors.primary,
           ),
         ),
       );

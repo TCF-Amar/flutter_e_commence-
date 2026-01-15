@@ -61,7 +61,6 @@ class DioHelper {
     );
   }
 
-  /*
   Future<Response<T>> post<T>(
     String url, {
     dynamic body,
@@ -77,6 +76,7 @@ class DioHelper {
     );
   }
 
+  /*
   Future<Response<T>> put<T>(
     String url, {
     dynamic body,

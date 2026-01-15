@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_commerce/features/product/data/models/product_model.dart';
+import 'package:flutter_commerce/features/product/models/product_model.dart';
 
 import 'app_button.dart';
 import 'app_text.dart';
@@ -13,7 +13,7 @@ class AppProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+      margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -37,9 +37,9 @@ class AppProductCard extends StatelessWidget {
                     child: CachedNetworkImage(
                       imageUrl: product.image,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) =>
+                      placeholder: (_, _) =>
                           Container(color: Colors.grey.shade200),
-                      errorWidget: (_, __, ___) => Container(
+                      errorWidget: (_, _, _) => Container(
                         color: Colors.grey.shade300,
                         child: const Icon(Icons.image_not_supported, size: 30),
                       ),

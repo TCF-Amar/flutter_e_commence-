@@ -13,7 +13,7 @@ class AppText extends StatelessWidget {
   final Color? color;
   final TextAlign textAlign;
   final TextDecoration? decoration;
-
+  final bool? uppercase;
   // behavior
   final int? maxLines;
   final TextOverflow overflow;
@@ -30,12 +30,13 @@ class AppText extends StatelessWidget {
     this.letterSpacing,
     this.height,
     this.decoration,
+    this.uppercase,
   });
 
   @override
   Widget build(BuildContext context) {
     return Text(
-      text,
+      uppercase == true ? text.toUpperCase() : text,
       maxLines: maxLines,
       overflow: overflow,
       textAlign: textAlign,

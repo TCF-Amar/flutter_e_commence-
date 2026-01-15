@@ -10,17 +10,13 @@ class AppStorage extends GetxController {
 
   /// Initialize storage by loading data from SharedPreferences
   /// This should be called before the app starts
+  ///
   Future<void> init() async {
     pref = await SharedPreferences.getInstance();
     isLoggedIn.value = pref?.getBool(StorageKeys.isLoggedIn) ?? false;
     token.value = pref?.getString(StorageKeys.token) ?? '';
+    // clear();
   }
-
-  // @override 
-  // void onReady() {
-  //   super.onReady();
-  //   // Data is already loaded in init()
-  // }
 
   void setIsLoggedIn(bool value) {
     isLoggedIn.value = value;
