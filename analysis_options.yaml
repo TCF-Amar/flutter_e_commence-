@@ -2,3 +2,5 @@ include: package:flutter_lints/flutter.yaml
 analyzer:
   errors:
     unused_element: ignore
+    unnecessary_underscores: ignore
+    unintended_html_in_doc_comment: ignore

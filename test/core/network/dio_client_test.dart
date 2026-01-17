@@ -1,41 +1,61 @@
-// import 'package:dio/dio.dart';
-// import 'package:flutter_commerce/core/environment/environment.dart';
-// import 'package:flutter_commerce/core/network/dio_client.dart';
-// import 'package:flutter_dotenv/flutter_dotenv.dart';
-// import 'package:flutter_test/flutter_test.dart';
-// import 'package:mocktail/mocktail.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter_commerce/core/environment/environment.dart';
+import 'package:flutter_commerce/core/network/dio_client.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-// class MockDio extends Mock implements Dio {}
+void main() {
+  late DioClient dioClient;
 
-// class MockInterceptors extends Mock implements Interceptors {}
+  setUpAll(() async {
+    await dotenv.load(fileName: '.env.development');
+  });
 
-// void main() {
-//   late MockDio mockDio;
-//   late DioClient dioClient;
-//   late BaseOptions baseOptions;
+  setUp(() {
+    dioClient = DioClient();
+  });
 
-//   setUpAll(() async {
-//     await dotenv.load(fileName: '.env.development');
-//   });
+  group('DioClient', () {
+    test('should return singleton instance', () {
+      final instance1 = DioClient();
+      final instance2 = DioClient();
 
-//   setUp(() {
-//     mockDio = MockDio();
-//     when(() => mockDio.interceptors).thenReturn(MockInterceptors());
-//     baseOptions = BaseOptions(baseUrl: Environment.baseUrl);
-//     when(() => mockDio.options).thenReturn(baseOptions);
-//   });
+      expect(instance1, same(instance2));
+    });
 
-//   test('should use injected Dio instance', () {
-//     expect(dioClient.dio, mockDio);
-//   });
+    test('should have Dio instance configured', () {
+      expect(dioClient.dio, isA<Dio>());
+    });
 
-//   test('should have correct baseUrl', () {
-//     // dioClient = DioClient.create(dio: mockDio);
+    test('should have correct baseUrl from environment', () {
+      expect(dioClient.dio.options.baseUrl, Environment.baseUrl);
+    });
 
-//     expect(dioClient.dio.options.baseUrl, Environment.baseUrl);
-//   });
+    test('should have correct timeout configurations', () {
+      expect(dioClient.dio.options.connectTimeout, const Duration(seconds: 30));
+      expect(dioClient.dio.options.receiveTimeout, const Duration(seconds: 30));
+      expect(dioClient.dio.options.sendTimeout, const Duration(seconds: 30));
+    });
 
-//   test('should throw exception when dio is null', () {
-//     expect(dioClient.dio, isA<Dio>());
-//   });
-// }
+    test('should have JSON response type', () {
+      expect(dioClient.dio.options.responseType, ResponseType.json);
+    });
+
+    test('should have correct headers', () {
+      expect(dioClient.dio.options.headers['Accept'], 'application/json');
+      expect(dioClient.dio.options.headers['Content-Type'], 'application/json');
+    });
+
+    test('should have interceptors configured', () {
+      expect(dioClient.dio.interceptors.isNotEmpty, true);
+    });
+
+    test('reset should clear and re-add interceptors', () {
+      final initialInterceptorCount = dioClient.dio.interceptors.length;
+
+      dioClient.reset();
+
+      expect(dioClient.dio.interceptors.length, initialInterceptorCount);
+    });
+  });
+}

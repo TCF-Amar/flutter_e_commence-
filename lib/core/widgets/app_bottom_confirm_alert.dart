@@ -6,6 +6,13 @@ Future<bool> showBottomConfirmAlert({
   String message = 'Are you sure?',
   String confirmText = 'Yes',
   String cancelText = 'No',
+  IconData? confirmIcon,
+  IconData? cancelIcon,
+  bool isDestructive = false,
+  Color? confirmBackgroundColor,
+  Color? cancelBackgroundColor,
+  Color? confirmTextColor,
+  Color? cancelTextColor,
 }) async {
   final result = await showModalBottomSheet<bool>(
     context: context,
@@ -14,13 +21,15 @@ Future<bool> showBottomConfirmAlert({
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
     builder: (context) {
+      final theme = Theme.of(context);
+
       return SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // drag handle
+              /// Drag handle
               Container(
                 width: 40,
                 height: 4,
@@ -32,37 +41,72 @@ Future<bool> showBottomConfirmAlert({
 
               const SizedBox(height: 16),
 
+              /// Title
               Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 18,
+                style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
 
               const SizedBox(height: 8),
 
+              /// Message
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey.shade700),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey.shade700,
+                ),
               ),
 
               const SizedBox(height: 24),
 
               Row(
                 children: [
+                  /// Cancel Button
                   Expanded(
-                    child: OutlinedButton(
+                    child: OutlinedButton.icon(
                       onPressed: () => Navigator.pop(context, false),
-                      child: Text(cancelText),
+                      icon: cancelIcon != null
+                          ? Icon(cancelIcon, size: 18, color: cancelTextColor)
+                          : null,
+                      label: Text(
+                        cancelText,
+                        style: TextStyle(color: cancelTextColor),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: cancelBackgroundColor,
+                      ),
                     ),
                   ),
+
                   const SizedBox(width: 12),
+
+                  /// Confirm Button
                   Expanded(
-                    child: ElevatedButton(
+                    child: ElevatedButton.icon(
                       onPressed: () => Navigator.pop(context, true),
-                      child: Text(confirmText),
+                      icon: confirmIcon != null
+                          ? Icon(
+                              confirmIcon,
+                              size: 18,
+                              color: confirmTextColor ?? Colors.white,
+                            )
+                          : null,
+                      label: Text(
+                        confirmText,
+                        style: TextStyle(
+                          color: confirmTextColor ?? Colors.white,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            confirmBackgroundColor ??
+                            (isDestructive
+                                ? Colors.red
+                                : theme.colorScheme.primary),
+                      ),
                     ),
                   ),
                 ],
@@ -76,5 +120,5 @@ Future<bool> showBottomConfirmAlert({
     },
   );
 
-  return result ?? false; // null = dismissed
+  return result ?? false;
 }

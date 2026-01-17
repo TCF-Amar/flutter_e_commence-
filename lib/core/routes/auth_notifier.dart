@@ -9,7 +9,8 @@ class AuthNotifier extends ChangeNotifier {
   AuthNotifier(this.storage) {
     _worker = everAll([
       storage.isLoggedIn,
-      storage.token,
+      storage.accessToken,
+      storage.refreshToken,
     ], (_) => notifyListeners());
   }
 

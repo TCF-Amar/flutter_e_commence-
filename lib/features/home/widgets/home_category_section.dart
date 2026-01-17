@@ -2,8 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_commerce/core/routes/app_routes.dart';
 import 'package:flutter_commerce/core/theme/theme_extensions.dart';
-import 'package:get/get.dart';
 import 'package:flutter_commerce/features/home/controllers/home_controller.dart';
+import 'package:get/get.dart';
 import 'package:flutter_commerce/core/widgets/app_text.dart';
 import 'package:go_router/go_router.dart';
 
@@ -61,16 +61,18 @@ class HomeCategorySection extends GetView<HomeController> {
                   onTap: () {
                     context.pushNamed(
                       AppRoutes.catagory.name,
-                      queryParameters: {'category': category},
+                      queryParameters: {'category': category.slug},
                     );
                   },
                   child: Container(
                     height: 40,
-                    width: double.tryParse((category.length * 13).toString()),
+                    width: double.tryParse(
+                      (category.name.length * 13).toString(),
+                    ),
                     margin: const EdgeInsets.only(right: 16),
                     decoration: BoxDecoration(
                       color: context.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Stack(
                       children: [
@@ -80,9 +82,9 @@ class HomeCategorySection extends GetView<HomeController> {
                           right: 0,
                           bottom: 0,
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(18),
+                            borderRadius: BorderRadius.circular(12),
                             child: CachedNetworkImage(
-                              imageUrl: "https://picsum.photos/200/300",
+                              imageUrl: category.image,
                               fit: BoxFit.cover,
                               placeholder: (context, url) => const Center(
                                 child: CircularProgressIndicator(),
@@ -98,14 +100,17 @@ class HomeCategorySection extends GetView<HomeController> {
                           right: 0,
                           bottom: 0,
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(18),
+                            borderRadius: BorderRadius.circular(12),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.5),
-                                borderRadius: BorderRadius.circular(18),
+                                color: context.colorScheme.surface.withValues(
+                                  alpha: 0.6,
+                                ),
+                                // .withValues(alpha: 0.6),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                             ),
                           ),
@@ -116,13 +121,14 @@ class HomeCategorySection extends GetView<HomeController> {
                           right: 0,
                           bottom: 0,
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(18),
+                            borderRadius: BorderRadius.circular(12),
                             child: Center(
                               child: AppText(
-                                "${category.capitalizeFirst}",
-                                fontSize: 18,
+                                "${category.name.capitalizeFirst}",
+                                fontSize: 16,
+
                                 fontWeight: FontWeight.w700,
-                                color: context.colorScheme.surface,
+                                color: context.textColors.primary,
                               ),
                             ),
                           ),

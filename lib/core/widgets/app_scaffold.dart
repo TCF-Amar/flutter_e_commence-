@@ -82,6 +82,7 @@ class AppScaffold extends StatelessWidget {
             drawer: drawer,
             bottomNavigationBar: bottomNavigationBar,
             floatingActionButton: floatingActionButton,
+
             backgroundColor: backgroundGradient == null
                 ? backgroundColor
                 : Colors.transparent,

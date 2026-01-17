@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_commerce/core/routes/app_routes.dart';
-import 'package:flutter_commerce/features/product/controllers/product_controller.dart';
+import 'package:flutter_commerce/features/product/presentation/controllers/product_controller.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 

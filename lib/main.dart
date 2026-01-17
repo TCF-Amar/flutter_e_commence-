@@ -31,11 +31,12 @@ void main() async {
   await storage.init(); //? Load data from SharedPreferences
   Get.put(storage); //? Register with GetX
 
+  //* Initialize ThemeController
 
   final authNotifier = AuthNotifier(storage);
 
   //* Initialize DependenciesInjection
-  AppDI.init();
+  DependenciesInjection();
 
   //* Run the app
   runApp(App(storage: storage, authNotifier: authNotifier));

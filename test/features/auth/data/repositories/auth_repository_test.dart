@@ -1,81 +1,206 @@
-import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_commerce/core/error/failure.dart';
-import 'package:flutter_commerce/core/network/api_end_points.dart';
-import 'package:flutter_commerce/core/network/dio_helper.dart';
-import 'package:flutter_commerce/features/auth/repositories/auth_repository.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
+import 'package:flutter_commerce/core/utils/either.dart';
+import 'package:flutter_commerce/features/auth/data/datasources/auth_remote_datasource_impl.dart';
+import 'package:flutter_commerce/features/auth/data/models/login_request_dto.dart';
+import 'package:flutter_commerce/features/auth/data/models/login_response_dto.dart';
+import 'package:flutter_commerce/features/auth/data/models/user_model.dart';
+import 'package:flutter_commerce/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:flutter_commerce/features/auth/domain/entities/login_credentials.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockDio extends Mock implements DioHelper {}
+class MockAuthRemoteDataSource extends Mock
+    implements AuthRemoteDataSourceImpl {}
 
 void main() {
-  late MockDio mockDio;
-  late AuthRepository repository;
+  late MockAuthRemoteDataSource mockDataSource;
+  late AuthRepositoryImpl repository;
 
-  setUpAll(() async {
-    await dotenv.load(fileName: ".env.development");
-    mockDio = MockDio();
-    repository = AuthRepository(mockDio);
+  setUpAll(() {
+    // Register fallback values for mocktail
+    registerFallbackValue(const LoginRequestDto(email: '', password: ''));
   });
 
-  // setUp(() {
-  //   mockDio = MockDio();
-  //   repository = AuthRepository();
-  // });
+  setUp(() {
+    mockDataSource = MockAuthRemoteDataSource();
+    repository = AuthRepositoryImpl(mockDataSource);
+  });
 
-  test("Login with valid credentials", () async {
-    // final token =
-    //     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInVzZXIiOiJqb2huZCIsImlhdCI6MTc2ODIwMjA0MH0.o-jG6R4RWI_BHBzkBajJZ6rm2mSjrg6g-C8e2DQYBmE";
-    when(
-      () => mockDio.post(
-        ApiEndpoints.login,
-        body: any(named: 'body'),
-        headers: any(named: 'headers'),
-        queryParameters: any(named: 'queryParameters'),
-      ),
-    ).thenAnswer(
-      (_) async => Response(
-        data: {'token': "token"},
-        requestOptions: RequestOptions(path: ApiEndpoints.login),
-      ),
-    );
+  group('AuthRepository - login', () {
+    test('should return LoginResponse when login is successful', () async {
+      // Arrange
+      const credentials = LoginCredentials(
+        email: 'john@mail.com',
+        password: 'changeme',
+      );
 
-    final result = await repository.login("johnd", "m38rmF\$");
+      final mockResponse = LoginResponseDto(
+        accessToken: 'test_access_token',
+        refreshToken: 'test_refresh_token',
+      );
 
-    expect(result.isRight, true);
-    result.fold((_) => fail("Expected success"), (r) {
-      debugPrint('✅ LOGIN SUCCESS');
-      debugPrint('TOKEN: ${r.token}');
+      when(
+        () => mockDataSource.login(any()),
+      ).thenAnswer((_) async => Right(mockResponse));
+
+      // Act
+      final result = await repository.login(credentials);
+
+      // Assert
+      expect(result.isRight, true);
+      result.fold((l) => fail('Expected success'), (response) {
+        expect(response.accessToken, 'test_access_token');
+        expect(response.refreshToken, 'test_refresh_token');
+      });
+
+      verify(() => mockDataSource.login(any())).called(1);
+    });
+
+    test('should return Failure when login fails', () async {
+      // Arrange
+      const credentials = LoginCredentials(
+        email: 'wrong@mail.com',
+        password: 'wrongpassword',
+      );
+
+      final failure = UnknownFailure('Invalid credentials');
+
+      when(
+        () => mockDataSource.login(any()),
+      ).thenAnswer((_) async => Left(failure));
+
+      // Act
+      final result = await repository.login(credentials);
+
+      // Assert
+      expect(result.isLeft, true);
+      result.fold((failure) {
+        expect(failure, isA<Failure>());
+      }, (r) => fail('Expected failure'));
     });
   });
 
-  test("Login with invalid credentials", () async {
-    when(
-      () => mockDio.post(
-        ApiEndpoints.login,
-        body: any(named: 'body'),
-        headers: any(named: 'headers'),
-        queryParameters: any(named: 'queryParameters'),
-      ),
-    ).thenThrow(
-      DioException(
-        requestOptions: RequestOptions(path: ApiEndpoints.login),
-        response: Response(
-          statusCode: 401,
-          requestOptions: RequestOptions(path: ApiEndpoints.login),
-        ),
-      ),
+  group('AuthRepository - getLoginUser', () {
+    test('should return User when fetching user is successful', () async {
+      // Arrange
+      const accessToken = 'valid_access_token';
+
+      final mockUser = UserModel(
+        id: 1,
+        email: 'john@mail.com',
+        password: 'changeme',
+        name: 'John Doe',
+        role: 'customer',
+        avatar: 'https://example.com/avatar.jpg',
+      );
+
+      when(
+        () => mockDataSource.getLoginuser(any()),
+      ).thenAnswer((_) async => mockUser);
+
+      // Act
+      final result = await repository.getLoginUser(accessToken);
+
+      // Assert
+      expect(result.isRight, true);
+      result.fold((l) => fail('Expected success'), (user) {
+        expect(user.id, 1);
+        expect(user.email, 'john@mail.com');
+        expect(user.name, 'John Doe');
+      });
+
+      verify(() => mockDataSource.getLoginuser(accessToken)).called(1);
+    });
+
+    test('should return Failure when fetching user fails', () async {
+      // Arrange
+      const accessToken = 'invalid_token';
+
+      when(
+        () => mockDataSource.getLoginuser(any()),
+      ).thenThrow(Exception('Unauthorized'));
+
+      // Act
+      final result = await repository.getLoginUser(accessToken);
+
+      // Assert
+      expect(result.isLeft, true);
+      result.fold(
+        (failure) => expect(failure, isA<Failure>()),
+        (r) => fail('Expected failure'),
+      );
+    });
+  });
+
+  group('AuthRepository - refreshToken', () {
+    test(
+      'should return LoginResponse when refresh token is successful',
+      () async {
+        // Arrange
+        const refreshToken = 'valid_refresh_token';
+
+        final mockResponse = LoginResponseDto(
+          accessToken: 'new_access_token',
+          refreshToken: 'new_refresh_token',
+        );
+
+        when(
+          () => mockDataSource.refreshToken(any()),
+        ).thenAnswer((_) async => Right(mockResponse));
+
+        // Act
+        final result = await repository.refreshToken(refreshToken);
+
+        // Assert
+        expect(result.isRight, true);
+        result.fold((l) => fail('Expected success'), (response) {
+          expect(response.accessToken, 'new_access_token');
+          expect(response.refreshToken, 'new_refresh_token');
+        });
+
+        verify(() => mockDataSource.refreshToken(refreshToken)).called(1);
+      },
     );
 
-    final result = await repository.login("test", "wrong_password");
+    test('should return Failure when refresh token fails', () async {
+      // Arrange
+      const refreshToken = 'invalid_token';
 
-    expect(result.isLeft, true);
+      final failure = UnknownFailure('Refresh token expired');
 
-    result.fold((l) {
-      expect(l, isA<Failure>());
-    }, (_) => fail("Expected failure"));
+      when(
+        () => mockDataSource.refreshToken(any()),
+      ).thenAnswer((_) async => Left(failure));
+
+      // Act
+      final result = await repository.refreshToken(refreshToken);
+
+      // Assert
+      expect(result.isLeft, true);
+      result.fold((failure) {
+        expect(failure, isA<Failure>());
+      }, (r) => fail('Expected failure'));
+    });
+
+    test('should return Failure when data source throws exception', () async {
+      // Arrange
+      const refreshToken = 'valid_token';
+
+      when(
+        () => mockDataSource.refreshToken(any()),
+      ).thenThrow(Exception('Network error'));
+
+      // Act
+      final result = await repository.refreshToken(refreshToken);
+
+      // Assert
+      expect(result.isLeft, true);
+      result.fold(
+        (failure) => expect(failure, isA<Failure>()),
+        (r) => fail('Expected failure'),
+      );
+    });
   });
+
+  
 }

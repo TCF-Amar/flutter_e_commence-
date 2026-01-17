@@ -26,5 +26,5 @@ class ServerFailure extends Failure {
 }
 
 class UnknownFailure extends Failure {
-  const UnknownFailure() : super('Something went wrong');
+  UnknownFailure(Object e) : super(e.toString());
 }

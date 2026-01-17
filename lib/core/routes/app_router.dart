@@ -1,12 +1,13 @@
 import 'package:flutter_commerce/core/routes/auth_notifier.dart';
 import 'package:flutter_commerce/core/storage/app_storage.dart';
-import 'package:flutter_commerce/features/auth/screens/login_screen.dart';
-import 'package:flutter_commerce/features/dashboard/screens/dashboard_screen.dart';
-import 'package:flutter_commerce/features/product/screens/category_screen.dart';
-import 'package:flutter_commerce/features/product/screens/collection_screen.dart';
-import 'package:flutter_commerce/features/product/screens/search_screen.dart';
-import 'package:flutter_commerce/features/settings/screens/settings_screen.dart';
-import 'package:flutter_commerce/features/splash/screens/splash_screen.dart';
+import 'package:flutter_commerce/features/auth/presentation/pages/login_screen.dart';
+import 'package:flutter_commerce/features/dashboard/pages/dashboard_screen.dart';
+import 'package:flutter_commerce/features/product/presentation/pages/category_screen.dart';
+import 'package:flutter_commerce/features/product/presentation/pages/collection_screen.dart';
+import 'package:flutter_commerce/features/product/presentation/pages/product_details_screen.dart';
+import 'package:flutter_commerce/features/product/presentation/pages/search_screen.dart';
+import 'package:flutter_commerce/features/settings/presentation/pages/settings_screen.dart';
+import 'package:flutter_commerce/features/splash/pages/splash_screen.dart';
 import './app_routes.dart';
 import 'package:go_router/go_router.dart';
 
@@ -24,7 +25,9 @@ class AppRouter {
 
       redirect: (context, state) {
         final isLoggedIn = storage.isLoggedIn.value;
-        final hasToken = storage.token.value.isNotEmpty;
+        final hasToken =
+            storage.accessToken.value.isNotEmpty &&
+            storage.refreshToken.value.isNotEmpty;
         final goingToLogin = state.matchedLocation == '/login';
         final goingToSplash = state.matchedLocation == '/splash';
 
@@ -77,19 +80,19 @@ class AppRouter {
           },
         ),
         GoRoute(
-          name: AppRoutes.product.name,
-          path: AppRoutes.product.path,
+          name: AppRoutes.collection.name,
+          path: AppRoutes.collection.path,
           builder: (context, state) {
             return const CollectionScreen();
           },
         ),
-        // GoRoute(
-        //   name: AppRoutes.productDetails.name,
-        //   path: AppRoutes.productDetails.path,
-        //   builder: (context, state) {
-        //     return const ProductDetailsScreen();
-        //   },
-        // ),
+        GoRoute(
+          name: AppRoutes.product.name,
+          path: AppRoutes.product.path,
+          builder: (context, state) {
+            return ProductDetails(id: state.uri.queryParameters['id'] ?? "");
+          },
+        ),
         // GoRoute(
         //   name: AppRoutes.cart.name,
         //   path: AppRoutes.cart.path,
