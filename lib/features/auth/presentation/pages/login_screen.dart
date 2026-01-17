@@ -23,13 +23,13 @@ class LoginScreen extends GetView<AuthController> {
               children: [
                 AppTextFormField(
                   prefixIcon: const Icon(Icons.email_outlined),
-                  controller: controller.usernameController,
-                  hint: 'Username',
-                  label: 'Username',
+                  controller: controller.emailController,
+                  hint: 'Email',
+                  label: 'Email',
                   keyboardType: TextInputType.text,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your username';
+                      return 'Please enter your email';
                     }
                     return null;
                   },
@@ -45,9 +45,9 @@ class LoginScreen extends GetView<AuthController> {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your password';
                     }
-                    if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
-                    }
+                    // if (value.length < 6) {
+                    //   return 'Password must be at least 6 characters';
+                    // }
                     return null;
                   },
                 ),

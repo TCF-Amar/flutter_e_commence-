@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_commerce/core/routes/app_routes.dart';
 import 'package:flutter_commerce/core/theme/theme_extensions.dart';
 import 'package:flutter_commerce/core/widgets/app_back_button.dart';
-import 'package:flutter_commerce/core/widgets/app_product_card.dart';
 import 'package:flutter_commerce/core/widgets/app_scaffold.dart';
 import 'package:flutter_commerce/core/widgets/app_text.dart';
-import 'package:flutter_commerce/features/product/presentation/controllers/category_controller.dart';
+import 'package:flutter_commerce/features/product/presentation/controllers/product_category_controller.dart';
+import 'package:flutter_commerce/features/product/presentation/widgets/list_all__product.dart';
+import 'package:flutter_commerce/features/product/presentation/widgets/sort_filter_tile.dart';
+import 'package:flutter_commerce/features/product/presentation/widgets/loaders/product_list_skeleton.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
@@ -18,12 +20,12 @@ class CategoryScreen extends StatefulWidget {
 }
 
 class _CategoryScreenState extends State<CategoryScreen> {
-  late final CategoryController controller;
+  late final ProductCategoryController controller;
 
   @override
   void initState() {
     super.initState();
-    controller = Get.put(CategoryController());
+    controller = Get.find<ProductCategoryController>();
     controller.initializeWithCategory(widget.category);
   }
 
@@ -34,21 +36,28 @@ class _CategoryScreenState extends State<CategoryScreen> {
       safeArea: false,
       backgroundColor: context.colorScheme.background,
       appBar: AppBar(
+        toolbarHeight: MediaQuery.of(context).size.height * 0.05,
         leading: const AppBackButton(),
         centerTitle: true,
-        title: Obx(() {
-          final category = controller.selectedCategory.value;
-          return AppText(
-            category.isEmpty
-                ? "All Products"
-                : category.capitalizeFirst ?? category,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          );
-        }),
+        title: const AppText(
+          "Category",
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
         backgroundColor: context.colorScheme.background,
+        surfaceTintColor: context.colorScheme.background,
         elevation: 0,
         actions: [
+          Obx(() {
+            if (controller.selectedCategory.value.isNotEmpty) {
+              return IconButton(
+                icon: const Icon(Icons.clear_all_outlined),
+                tooltip: 'Clear all',
+                onPressed: controller.clearAllSelections,
+              );
+            }
+            return const SizedBox.shrink();
+          }),
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
@@ -61,13 +70,12 @@ class _CategoryScreenState extends State<CategoryScreen> {
       body: Column(
         children: [
           // Category filter chips
-          AnimatedContainer(
+          Container(
             margin: const EdgeInsets.only(top: 10),
-            height: 40,
-            duration: const Duration(milliseconds: 600),
+            height: 30,
             child: Obx(() {
-              // Access selectedCategory to ensure Obx tracks it
-              final selected = controller.selectedCategory.value;
+              // Force reactivity by accessing length
+              final selectedCount = controller.selectedCategory.value;
 
               return ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -77,53 +85,64 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   if (index == 0) {
                     return _buildCategoryChip(
                       category: 'All',
-                      isSelected: selected.isEmpty,
+                      isSelected: selectedCount == "",
                       showRemove: false,
                     );
                   }
 
                   final category = controller.categoryList[index - 1];
+                  // Directly check to ensure reactivity
+                  final isSelected =
+                      controller.selectedCategory.value == category.slug;
                   return _buildCategoryChip(
-                    category: category,
-                    isSelected: selected == category,
-                    showRemove: selected == category,
+                    category: category.slug,
+                    isSelected: isSelected,
+                    showRemove: isSelected,
                   );
                 },
               );
             }),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 5),
+          const SortFilterTile(),
+          const SizedBox(height: 5),
           Expanded(
             child: Obx(() {
               final filteredProducts = controller.filteredProducts;
               final isLoading = controller.isLoading;
 
               if (isLoading) {
-                return const Center(child: CircularProgressIndicator());
+                return const ProductListSkeleton();
               }
-
-              if (filteredProducts.isEmpty) {
-                return const Center(
-                  child: AppText(
-                    'No products found in this category',
-                    fontSize: 16,
+              if (controller.allProducts.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.inventory_2_outlined,
+                        size: 64,
+                        color: context.textColors.secondary,
+                      ),
+                      const SizedBox(height: 16),
+                      AppText(
+                        'No products found',
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      const SizedBox(height: 8),
+                      AppText(
+                        'Try selecting different categories',
+                        fontSize: 14,
+                        color: context.textColors.secondary,
+                      ),
+                    ],
                   ),
                 );
               }
-
-              return GridView.builder(
-                padding: const EdgeInsets.only(bottom: 45, left: 16, right: 16),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.7,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                ),
-                itemCount: filteredProducts.length,
-                itemBuilder: (context, index) {
-                  final product = filteredProducts[index];
-                  return AppProductCard(product: product);
-                },
+              return ListAllProduct(
+                products: filteredProducts,
+                controller: controller.scrollController,
               );
             }),
           ),
@@ -139,15 +158,17 @@ class _CategoryScreenState extends State<CategoryScreen> {
   }) {
     return GestureDetector(
       onTap: () {
-        if (category == 'All') {
-          controller.setSelectedCategory('');
+        if (category.toLowerCase() == 'all') {
+          controller.clearAllSelections();
         } else {
-          controller.setSelectedCategory(category);
+          controller.toggleCategory(category.toLowerCase());
         }
       },
-      child: Container(
+      child: AnimatedContainer(
         margin: const EdgeInsets.only(right: 8),
         padding: const EdgeInsets.symmetric(horizontal: 16),
+        duration: const Duration(milliseconds: 300),
+        clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(
           color: isSelected
               ? context.colorScheme.primary
@@ -165,7 +186,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
             AppText(
               category.capitalizeFirst ?? category,
               fontSize: 14,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
               color: isSelected ? Colors.white : context.textColors.primary,
             ),
 
@@ -173,7 +194,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
               const SizedBox(width: 6),
               GestureDetector(
                 onTap: () {
-                  controller.clearSelection();
+                  controller.toggleCategory(category.toLowerCase());
                 },
                 child: const Icon(Icons.close, size: 16, color: Colors.white),
               ),

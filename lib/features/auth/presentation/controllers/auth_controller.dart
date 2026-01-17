@@ -31,7 +31,7 @@ class AuthController extends GetxController {
   final formKey = GlobalKey<FormState>();
 
   //* TextEditingController
-  final usernameController = TextEditingController();
+  final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
   //* isLoading
@@ -45,36 +45,40 @@ class AuthController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    ever(storage.token, (_) {
-      if (storage.token.isNotEmpty) {
+    everAll([storage.accessToken, storage.refreshToken], (_) {
+      if (storage.accessToken.isNotEmpty && storage.refreshToken.isNotEmpty) {
         checkSession();
       }
+      if (storage.accessToken.isEmpty && storage.refreshToken.isEmpty) {
+        storage.setIsLoggedIn(false);
+      }
     });
-    if (storage.token.value.isNotEmpty) {
-      checkSession();
-    }
   }
 
   //* Check user logged in or not
   void checkSession() async {
-    final token = storage.token.value;
+    final accessToken = storage.accessToken.value;
+    final refreshToken = storage.refreshToken.value;
     final isLoggedIn = storage.isLoggedIn.value;
-    debugPrint("token: $token");
+    debugPrint("token: $accessToken");
 
     //* Only check expiration if we have a valid token
-    if (token.isNotEmpty && isLoggedIn) {
-      final isExpired = Jwt.isExpired(token);
+    if (accessToken.isNotEmpty && isLoggedIn) {
+      final isExpired = Jwt.isExpired(accessToken);
+      final isRefreshExpired = Jwt.isExpired(refreshToken);
+
       debugPrint("Token expired: $isExpired");
-      if (isExpired) {
+
+      if (isExpired || isRefreshExpired) {
         debugPrint("Clearing expired session");
         storage.clear();
       } else {
-        final decoded = Jwt.decodeToken(token);
-        debugPrint("decoded: ${decoded?["sub"]}");
-        await fetchLoginUser(decoded?["sub"]);
+        await fetchLoginUser(accessToken);
       }
-    } else if (token.isEmpty && isLoggedIn) {
-      //* If logged in but no token, clear the session
+    } else if (accessToken.isEmpty && refreshToken.isEmpty && isLoggedIn) {
+      /*
+      * If logged in but no token, clear the session
+      */
       debugPrint("No token found, clearing session");
       storage.clear();
     }
@@ -82,33 +86,32 @@ class AuthController extends GetxController {
 
   //* Login User
   Future<void> login(BuildContext context) async {
-    final username = usernameController.text.trim();
+    final email = emailController.text.trim();
     final password = passwordController.text.trim();
 
     if (formKey.currentState!.validate()) {
       isLoading.value = true;
 
       // Create credentials entity
-      final credentials = LoginCredentials(
-        username: username,
-        password: password,
-      );
+      final credentials = LoginCredentials(email: email, password: password);
 
       // Call login use case
       final result = await loginUseCase(credentials);
-
       result.fold(
         (failure) {
           isLoading.value = false;
-          AppSnackbar.error(message: failure.message);
+          AppSnackbar.error(message: "$failure");
         },
-        (token) {
+        (loginResponse) {
           isLoading.value = false;
-          storage.setToken(token);
+          storage.setToken(
+            loginResponse.accessToken,
+            loginResponse.refreshToken,
+          );
           storage.setIsLoggedIn(true);
           AppSnackbar.success(message: "Login successful");
           checkSession();
-          usernameController.clear();
+          emailController.clear();
           passwordController.clear();
 
           //* Navigate to dashboard after successful login
@@ -121,8 +124,8 @@ class AuthController extends GetxController {
   }
 
   //* fetchLoginUser
-  Future<void> fetchLoginUser(int id) async {
-    final result = await getUserUseCase(id);
+  Future<void> fetchLoginUser(String accessToken) async {
+    final result = await getUserUseCase(accessToken);
     result.fold(
       (failure) {
         AppSnackbar.error(message: failure.message);
@@ -135,14 +138,14 @@ class AuthController extends GetxController {
 
   //* Logout User
   Future<void> logout() async {
-    await logoutUseCase();
+    // await logoutUseCase();
     storage.clear();
   }
 
   @override
   void dispose() {
     super.dispose();
-    usernameController.dispose();
+    emailController.dispose();
     passwordController.dispose();
   }
 }

@@ -6,16 +6,20 @@ class AppRoutes {
     name: 'dashboard',
     path: '/dashboard',
   );
+  static final RouteModel collection = RouteModel(
+    name: 'collection',
+    path: '/collection',
+  );
   static final RouteModel login = RouteModel(name: 'login', path: '/login');
   static final RouteModel home = RouteModel(name: 'home', path: '/home');
   static final RouteModel product = RouteModel(
     name: 'product',
     path: '/product',
   );
-  static final RouteModel productDetails = RouteModel(
-    name: 'productDetails',
-    path: '/productDetails',
-  );
+  // static final RouteModel productDetails = RouteModel(
+  //   name: 'productDetails',
+  //   path: '/productDetails',
+  // );
   static final RouteModel cart = RouteModel(name: 'cart', path: '/cart');
   static final RouteModel checkout = RouteModel(
     name: 'checkout',

@@ -6,6 +6,7 @@ class ApiEndpoints {
   static const String _products = '/products';
   // static const String _carts = '/carts';
   // static const String _orders = '/orders';
+  static const String profile = '$_auth/profile';
 
   static const String login = '$_auth/login';
 
@@ -19,7 +20,9 @@ class ApiEndpoints {
 
   static String productById(int id) => '$_products/$id';
 
-  static const String categories = '$_products/categories';
+  static const String categories = '/categories';
+  static String relatedProduct(String category) =>
+      '$_products/slug/$category/related';
 
   static const String addProduct = _products;
 }

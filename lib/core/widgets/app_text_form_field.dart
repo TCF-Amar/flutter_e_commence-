@@ -23,6 +23,7 @@ class AppTextFormField extends StatefulWidget {
   final double? borderRadius;
   final double? borderWidth;
   final Color? borderColor;
+  final ValueChanged<String>? onFieldSubmitted;
   const AppTextFormField({
     super.key,
     required this.controller,
@@ -43,6 +44,7 @@ class AppTextFormField extends StatefulWidget {
     this.borderRadius,
     this.borderWidth,
     this.borderColor,
+    this.onFieldSubmitted,
     // this.br,
     // this.bt,
     // this.bb,
@@ -74,11 +76,11 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
       enabled: widget.enabled,
       onTap: widget.onTap,
       onChanged: widget.onChanged,
+      onFieldSubmitted: widget.onFieldSubmitted,
       autofocus: widget.autoFocus!,
       textAlign: TextAlign.start,
 
       decoration: InputDecoration(
-        
         hintText: widget.hint,
         labelText: widget.label,
         prefixIcon: widget.prefixIcon,

@@ -21,6 +21,7 @@ class DioHelper {
       if (kDebugMode) {
         debugPrint('${method.name.toUpperCase()} $url');
         if (queryParameters != null) {
+          debugPrint('Headers: $url');
           debugPrint('Query: $queryParameters');
         }
         if (body != null) {
@@ -42,7 +43,7 @@ class DioHelper {
       return response;
     } on DioException catch (e) {
       if (kDebugMode) {
-        debugPrint('Error on $url: ${e.message}');
+        debugPrint('Error on $url: $e');
       }
       rethrow;
     }

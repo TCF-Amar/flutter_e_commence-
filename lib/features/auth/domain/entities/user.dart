@@ -1,69 +1,39 @@
-import 'package:flutter_commerce/features/auth/domain/entities/address.dart';
 
 /// Domain entity representing a user
 /// Pure Dart class with no external dependencies
 class User {
   final int id;
+  final String name;
+  final String role;
   final String email;
-  final String username;
-  final String phone;
-  final String firstname;
-  final String lastname;
-  final Address address;
+  final String password;
+
+  final String? avatar;
 
   const User({
     required this.id,
     required this.email,
-    required this.username,
-    required this.phone,
-    required this.firstname,
-    required this.lastname,
-    required this.address,
+    required this.name,
+    required this.role,
+    required this.password,
+    required this.avatar,
   });
 
   User copyWith({
     int? id,
     String? email,
-    String? username,
-    String? phone,
-    String? firstname,
-    String? lastname,
-    Address? address,
+    String? name,
+    String? role,
+    String? password,
+    String? avatar,
   }) {
     return User(
       id: id ?? this.id,
       email: email ?? this.email,
-      username: username ?? this.username,
-      phone: phone ?? this.phone,
-      firstname: firstname ?? this.firstname,
-      lastname: lastname ?? this.lastname,
-      address: address ?? this.address,
+      name: name ?? this.name,
+      role: role ?? this.role,
+      password: password ?? this.password,
+      avatar: avatar ?? this.avatar,
     );
-  }
-
-  String get fullName => '$firstname $lastname';
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is User &&
-        other.id == id &&
-        other.email == email &&
-        other.username == username &&
-        other.phone == phone &&
-        other.firstname == firstname &&
-        other.lastname == lastname &&
-        other.address == address;
-  }
-
-  @override
-  int get hashCode {
-    return id.hashCode ^
-        email.hashCode ^
-        username.hashCode ^
-        phone.hashCode ^
-        firstname.hashCode ^
-        lastname.hashCode ^
-        address.hashCode;
   }
 }

@@ -1,16 +1,28 @@
+import 'package:flutter_commerce/core/error/failure.dart';
+import 'package:flutter_commerce/core/utils/either.dart';
+import 'package:flutter_commerce/features/product/data/models/category_dto.dart';
 import 'package:flutter_commerce/features/product/data/models/product_dto.dart';
 
 /// Abstract interface for product remote data source
 abstract class ProductRemoteDataSource {
   /// Fetch all products
-  Future<List<ProductDto>> getProducts();
+  Future<Either<Failure, List<ProductDto>>> getProducts({
+    int offset,
+    int limit,
+  });
 
   /// Fetch all categories
-  Future<List<String>> getCategories();
+  Future<Either<Failure, List<CategoryDto>>> getCategories();
 
   /// Fetch product by ID
-  Future<ProductDto> getProductById(int productId);
+  Future<Either<Failure, ProductDto>> getProductById(int productId);
 
   /// Fetch products by category
-  Future<List<ProductDto>> getProductsByCategory(String category);
+  Future<Either<Failure, List<ProductDto>>> getProductsByCategory(
+    String category,
+  );
+
+  Future<Either<Failure, List<ProductDto>>> getSimilarProducts(String category);
+
+  Future<Either<Failure, List<ProductDto>>> getProductsBySearch(String search);
 }

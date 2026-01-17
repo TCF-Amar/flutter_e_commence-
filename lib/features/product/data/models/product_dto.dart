@@ -1,36 +1,32 @@
-import 'package:flutter_commerce/features/product/data/models/rating_dto.dart';
+import 'package:flutter_commerce/features/product/data/models/category_dto.dart';
 import 'package:flutter_commerce/features/product/domain/entities/product.dart';
 
 /// DTO for Product
 /// Handles JSON serialization/deserialization and conversion to/from domain entity
-class ProductDto {
-  final int id;
-  final String title;
-  final double price;
-  final String description;
-  final String category;
-  final String image;
-  final RatingDto rating;
-
+class ProductDto extends Product {
   const ProductDto({
-    required this.id,
-    required this.title,
-    required this.price,
-    required this.description,
-    required this.category,
-    required this.image,
-    required this.rating,
+    required super.id,
+    required super.title,
+    required super.slug,
+    required super.price,
+    required super.description,
+    required super.category,
+    required super.images,
   });
 
   factory ProductDto.fromJson(Map<String, dynamic> json) {
     return ProductDto(
       id: (json['id'] as num).toInt(),
       title: json['title'] ?? '',
+      slug: json['slug'] ?? '',
       price: (json['price'] as num).toDouble(),
       description: json['description'] ?? '',
-      category: json['category'] ?? '',
-      image: json['image'] ?? '',
-      rating: RatingDto.fromJson(json['rating']),
+      category: CategoryDto.fromJson(json['category']),
+      images:
+          (json['images'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
     );
   }
 
@@ -40,9 +36,13 @@ class ProductDto {
       'title': title,
       'price': price,
       'description': description,
-      'category': category,
-      'image': image,
-      'rating': rating.toJson(),
+      'category': {
+        'id': category.id,
+        'name': category.name,
+        'slug': category.slug,
+        'image': category.image,
+      },
+      'images': images,
     };
   }
 
@@ -51,11 +51,11 @@ class ProductDto {
     return Product(
       id: id,
       title: title,
+      slug: slug,
       price: price,
       description: description,
       category: category,
-      image: image,
-      rating: rating.toEntity(),
+      images: images,
     );
   }
 
@@ -64,11 +64,11 @@ class ProductDto {
     return ProductDto(
       id: entity.id,
       title: entity.title,
+      slug: entity.slug,
       price: entity.price,
       description: entity.description,
       category: entity.category,
-      image: entity.image,
-      rating: RatingDto.fromEntity(entity.rating),
+      images: entity.images,
     );
   }
 }

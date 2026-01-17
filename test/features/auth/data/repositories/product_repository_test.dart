@@ -1,28 +1,22 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_commerce/core/error/failure.dart';
-import 'package:flutter_commerce/core/network/api_end_points.dart';
-import 'package:flutter_commerce/core/network/dio_helper.dart';
-
-import 'package:flutter_commerce/features/product/models/product_model.dart';
-import 'package:flutter_commerce/features/product/repositories/product_repository.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_commerce/core/utils/either.dart';
+import 'package:flutter_commerce/features/product/data/datasources/product_remote_datasource.dart';
+import 'package:flutter_commerce/features/product/data/models/category_dto.dart';
+import 'package:flutter_commerce/features/product/data/models/product_dto.dart';
+import 'package:flutter_commerce/features/product/data/repositories/product_repository_impl.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockDio extends Mock implements DioHelper {}
+class MockProductRemoteDataSource extends Mock
+    implements ProductRemoteDataSource {}
 
 void main() {
-  late MockDio mockDio;
-  late ProductRepository repository;
-
-  setUpAll(() async {
-    await dotenv.load(fileName: ".env.development");
-    registerFallbackValue(Options());
-  });
+  late MockProductRemoteDataSource mockDataSource;
+  late ProductRepositoryImpl repository;
 
   setUp(() {
-    mockDio = MockDio();
-    repository = ProductRepository(mockDio);
+    mockDataSource = MockProductRemoteDataSource();
+    repository = ProductRepositoryImpl(mockDataSource);
   });
 
   group('ProductRepository - getProducts', () {
@@ -30,57 +24,61 @@ void main() {
       'should return list of products when API call is successful',
       () async {
         final mockProductData = [
-          {
-            'id': 1,
-            'title': 'Test Product 1',
-            'price': 99.99,
-            'description': 'Test Description 1',
-            'category': 'electronics',
-            'image': 'https://example.com/image1.jpg',
-            'rating': {'rate': 4.5, 'count': 100},
-          },
-          {
-            'id': 2,
-            'title': 'Test Product 2',
-            'price': 149.99,
-            'description': 'Test Description 2',
-            'category': 'clothing',
-            'image': 'https://example.com/image2.jpg',
-            'rating': {'rate': 4.0, 'count': 50},
-          },
+          ProductDto(
+            id: 1,
+            title: 'Test Product 1',
+            slug: 'test-product-1',
+            price: 99.99,
+            description: 'Test Description 1',
+            category: CategoryDto(
+              id: 1,
+              name: 'Electronics',
+              slug: 'electronics',
+              image: 'https://example.com/category.jpg',
+            ),
+            images: const ['https://example.com/image1.jpg'],
+          ),
+          ProductDto(
+            id: 2,
+            title: 'Test Product 2',
+            slug: 'test-product-2',
+            price: 149.99,
+            description: 'Test Description 2',
+            category: CategoryDto(
+              id: 2,
+              name: 'Clothing',
+              slug: 'clothing',
+              image: 'https://example.com/category2.jpg',
+            ),
+            images: const ['https://example.com/image2.jpg'],
+          ),
         ];
 
         when(
-          () => mockDio.get<List<dynamic>>(
-            ApiEndpoints.products,
-            queryParameters: null,
+          () => mockDataSource.getProducts(
+            offset: any(named: 'offset'),
+            limit: any(named: 'limit'),
           ),
-        ).thenAnswer(
-          (_) async => Response(
-            data: mockProductData,
-            requestOptions: RequestOptions(path: ApiEndpoints.products),
-          ),
-        );
+        ).thenAnswer((_) async => Right(mockProductData));
 
         // Act
-        final result = await repository.getProducts();
+        final result = await repository.getProducts(offset: 0, limit: 10);
 
         // Assert
         expect(result.isRight, true);
         result.fold((l) => fail('Expected success'), (products) {
-          expect(products, isA<List<ProductModel>>());
+          expect(products, isA<List<ProductDto>>());
           expect(products.isNotEmpty, true);
           expect(products.length, 2);
 
           final firstProduct = products[0];
           expect(firstProduct.id, 1);
           expect(firstProduct.title, 'Test Product 1');
+          expect(firstProduct.slug, 'test-product-1');
           expect(firstProduct.price, 99.99);
           expect(firstProduct.description, 'Test Description 1');
-          expect(firstProduct.category, 'electronics');
-          expect(firstProduct.image, 'https://example.com/image1.jpg');
-          expect(firstProduct.rating.rate, 4.5);
-          expect(firstProduct.rating.count, 100);
+          expect(firstProduct.category.name, 'Electronics');
+          expect(firstProduct.images[0], 'https://example.com/image1.jpg');
         });
       },
     );
@@ -88,105 +86,72 @@ void main() {
     test('should return empty list when API returns empty array', () async {
       // Arrange
       when(
-        () => mockDio.get<List<dynamic>>(
-          ApiEndpoints.products,
-          queryParameters: null,
+        () => mockDataSource.getProducts(
+          offset: any(named: 'offset'),
+          limit: any(named: 'limit'),
         ),
-      ).thenAnswer(
-        (_) async => Response(
-          data: [],
-          requestOptions: RequestOptions(path: ApiEndpoints.products),
-        ),
-      );
+      ).thenAnswer((_) async => Right([]));
 
       // Act
-      final result = await repository.getProducts();
+      final result = await repository.getProducts(offset: 0, limit: 10);
 
       // Assert
       expect(result.isRight, true);
       result.fold((l) => fail('Expected success'), (products) {
         expect(products.isEmpty, true);
-        expect(products, isA<List<ProductModel>>());
+        expect(products, isA<List<ProductDto>>());
         expect(products.length, 0);
       });
     });
 
-    test('should return Failure when API call fails with 401', () async {
+    
+  });
+
+  group('ProductRepository - getProductById', () {
+    test('should return product when API call is successful', () async {
       // Arrange
-      when(
-        () => mockDio.get<List<dynamic>>(
-          ApiEndpoints.products,
-          queryParameters: null,
+      final mockProduct = ProductDto(
+        id: 1,
+        title: 'Test Product',
+        slug: 'test-product',
+        price: 99.99,
+        description: 'Test Description',
+        category:  CategoryDto(
+          id: 1,
+          name: 'Electronics',
+          slug: 'electronics',
+          image: 'https://example.com/category.jpg',
         ),
-      ).thenThrow(
-        DioException(
-          requestOptions: RequestOptions(path: ApiEndpoints.products),
-          response: Response(
-            statusCode: 401,
-            requestOptions: RequestOptions(path: ApiEndpoints.products),
-          ),
-          type: DioExceptionType.badResponse,
-        ),
+        images: const ['https://example.com/image1.jpg'],
       );
 
+      when(
+        () => mockDataSource.getProductById(any()),
+      ).thenAnswer((_) async => Right(mockProduct));
+
       // Act
-      final result = await repository.getProducts();
+      final result = await repository.getProductById(1);
 
       // Assert
-      expect(result.isLeft, true);
-      result.fold((failure) {
-        expect(failure, isA<Failure>());
-      }, (r) => fail('Expected failure'));
+      expect(result.isRight, true);
+      result.fold((l) => fail('Expected success'), (product) {
+        expect(product, isA<ProductDto>());
+        expect(product.id, 1);
+        expect(product.title, 'Test Product');
+        expect(product.slug, 'test-product');
+      });
     });
 
-    test('should return Failure when API call fails with 404', () async {
+    test('should return Failure when product not found', () async {
       // Arrange
+      final failure = UnknownFailure("Product not found");
+
       when(
-        () => mockDio.get<List<dynamic>>(
-          ApiEndpoints.products,
-          queryParameters: null,
-        ),
-      ).thenThrow(
-        DioException(
-          requestOptions: RequestOptions(path: ApiEndpoints.products),
-          response: Response(
-            statusCode: 404,
-            requestOptions: RequestOptions(path: ApiEndpoints.products),
-          ),
-        ),
-      );
+        () => mockDataSource.getProductById(any()),
+      ).thenAnswer((_) async => Left(failure));
 
       // Act
-      final result = await repository.getProducts();
-
-      // Assert
-      expect(result.isLeft, true);
-      result.fold(
-        (failure) => expect(failure, isA<Failure>()),
-        (r) => fail('Expected failure'),
-      );
-    });
-
-    test('should return Failure when API call fails with 500', () async {
-      // Arrange
-      when(
-        () => mockDio.get<List<dynamic>>(
-          ApiEndpoints.products,
-          queryParameters: null,
-        ),
-      ).thenThrow(
-        DioException(
-          requestOptions: RequestOptions(path: ApiEndpoints.products),
-          response: Response(
-            statusCode: 500,
-            data: 'Internal Server Error',
-            requestOptions: RequestOptions(path: ApiEndpoints.products),
-          ),
-        ),
-      );
-
-      // Act
-      final result = await repository.getProducts();
+      final result = await repository.getProductById(999);
 
       // Assert
       expect(result.isLeft, true);
@@ -195,154 +160,75 @@ void main() {
         (r) => fail('Expected failure'),
       );
     });
+  });
 
-    test('should return Failure when network error occurs', () async {
+  group('ProductRepository - getProductsByCategory', () {
+    test('should return products for given category', () async {
       // Arrange
-      when(
-        () => mockDio.get<List<dynamic>>(
-          ApiEndpoints.products,
-          queryParameters: null,
+      final mockProducts = [
+        ProductDto(
+          id: 1,
+          title: 'Electronics Product',
+          slug: 'electronics-product',
+          price: 99.99,
+          description: 'Test Description',
+          category:  CategoryDto(
+            id: 1,
+            name: 'Electronics',
+            slug: 'electronics',
+            image: 'https://example.com/category.jpg',
+          ),
+          images: const ['https://example.com/image1.jpg'],
         ),
-      ).thenThrow(
-        DioException(
-          requestOptions: RequestOptions(path: ApiEndpoints.products),
-          type: DioExceptionType.connectionTimeout,
-        ),
-      );
-
-      // Act
-      final result = await repository.getProducts();
-
-      // Assert
-      expect(result.isLeft, true);
-      result.fold(
-        (failure) => expect(failure, isA<Failure>()),
-        (r) => fail('Expected failure'),
-      );
-    });
-
-    test('should handle malformed JSON gracefully', () async {
-      // Arrange
-      final malformedData = [
-        {
-          'id': 1,
-          'title': 'Test Product',
-          // Missing required fields like price, description, etc.
-        },
       ];
 
       when(
-        () => mockDio.get<List<dynamic>>(
-          ApiEndpoints.products,
-          queryParameters: null,
-        ),
-      ).thenAnswer(
-        (_) async => Response(
-          data: malformedData,
-          requestOptions: RequestOptions(path: ApiEndpoints.products),
-        ),
-      );
-
-      // Act & Assert
-      expect(() => repository.getProducts(), throwsA(isA<TypeError>()));
-    });
-
-    test('should return Failure when connection timeout occurs', () async {
-      // Arrange
-      when(
-        () => mockDio.get<List<dynamic>>(
-          ApiEndpoints.products,
-          queryParameters: null,
-        ),
-      ).thenThrow(
-        DioException(
-          requestOptions: RequestOptions(path: ApiEndpoints.products),
-          type: DioExceptionType.connectionTimeout,
-          message: 'Connection timeout',
-        ),
-      );
+        () => mockDataSource.getProductsByCategory(any()),
+      ).thenAnswer((_) async => Right(mockProducts));
 
       // Act
-      final result = await repository.getProducts();
-
-      // Assert
-      expect(result.isLeft, true);
-      result.fold((failure) {
-        expect(failure, isA<Failure>());
-      }, (r) => fail('Expected failure'));
-    });
-
-    test('should return Failure when receive timeout occurs', () async {
-      // Arrange
-      when(
-        () => mockDio.get<List<dynamic>>(
-          ApiEndpoints.products,
-          queryParameters: null,
-        ),
-      ).thenThrow(
-        DioException(
-          requestOptions: RequestOptions(path: ApiEndpoints.products),
-          type: DioExceptionType.receiveTimeout,
-          message: 'Receive timeout',
-        ),
-      );
-
-      // Act
-      final result = await repository.getProducts();
-
-      // Assert
-      expect(result.isLeft, true);
-      result.fold(
-        (failure) => expect(failure, isA<Failure>()),
-        (r) => fail('Expected failure'),
-      );
-    });
-
-    test('should parse products with all fields correctly', () async {
-      // Arrange
-      final completeProductData = [
-        {
-          'id': 1,
-          'title': 'Fjallraven - Foldsack No. 1 Backpack',
-          'price': 109.95,
-          'description': 'Your perfect pack for everyday use',
-          'category': 'men\'s clothing',
-          'image': 'https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg',
-          'rating': {'rate': 3.9, 'count': 120},
-        },
-      ];
-
-      when(
-        () => mockDio.get<List<dynamic>>(
-          ApiEndpoints.products,
-          queryParameters: null,
-        ),
-      ).thenAnswer(
-        (_) async => Response(
-          data: completeProductData,
-          requestOptions: RequestOptions(path: ApiEndpoints.products),
-        ),
-      );
-
-      // Act
-      final result = await repository.getProducts();
+      final result = await repository.getProductsByCategory('electronics');
 
       // Assert
       expect(result.isRight, true);
       result.fold((l) => fail('Expected success'), (products) {
         expect(products.length, 1);
-        final product = products[0];
-        expect(product.id, 1);
-        expect(product.title, 'Fjallraven - Foldsack No. 1 Backpack');
-        expect(product.price, 109.95);
-        expect(product.description, 'Your perfect pack for everyday use');
-        expect(product.category, 'men\'s clothing');
-        expect(
-          product.image,
-          'https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg',
-        );
-        expect(product.rating.rate, 3.9);
-        expect(product.rating.count, 120);
+        expect(products[0].category.name, 'Electronics');
+      });
+    });
+  });
+
+  group('ProductRepository - getCategories', () {
+    test('should return list of categories', () async {
+      // Arrange
+      final mockCategories = [
+         CategoryDto(
+          id: 1,
+          name: 'Electronics',
+          slug: 'electronics',
+          image: 'https://example.com/category1.jpg',
+        ),
+         CategoryDto(
+          id: 2,
+          name: 'Clothing',
+          slug: 'clothing',
+          image: 'https://example.com/category2.jpg',
+        ),
+      ];
+
+      when(
+        () => mockDataSource.getCategories(),
+      ).thenAnswer((_) async => Right(mockCategories));
+
+      // Act
+      final result = await repository.getCategories();
+
+      // Assert
+      expect(result.isRight, true);
+      result.fold((l) => fail('Expected success'), (categories) {
+        expect(categories.length, 2);
+        expect(categories[0].name, 'Electronics');
+        expect(categories[1].name, 'Clothing');
       });
     });
   });

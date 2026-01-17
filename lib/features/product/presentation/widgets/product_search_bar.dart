@@ -10,20 +10,21 @@ class ProductSearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       child: AppTextFormField(
         hint: 'Search products...',
         controller: controller.searchTextController,
         onChanged: (value) {
-          // Trigger search as user types
-          if (value.length >= 2) {
-            controller.search(value);
-          }
+          // Clear search when empty
           if (value.isEmpty) {
             controller.clearSearch();
           }
+          // Debounce in controller will trigger search automatically
         },
-
+        onFieldSubmitted: (value) {
+          // Commit search when user presses Enter
+          controller.commitSearch(value);
+        },
         prefixIcon: const Icon(Icons.search, color: Colors.grey),
         autoFocus: true,
         suffixIcon: Obx(() {

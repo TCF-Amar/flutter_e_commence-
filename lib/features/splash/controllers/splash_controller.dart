@@ -36,14 +36,14 @@ class SplashController extends GetxController
     animationController.forward();
   }
 
-
-
   Future<void> navigateNext(BuildContext context) async {
     await Future.delayed(const Duration(seconds: 2));
 
     final storage = Get.find<AppStorage>();
     final isLoggedIn = storage.isLoggedIn.value;
-    final hasToken = storage.token.value.isNotEmpty;
+    final hasToken =
+        storage.accessToken.value.isNotEmpty &&
+        storage.refreshToken.value.isNotEmpty;
 
     debugPrint('🚀 Splash navigating...');
     debugPrint('   isLoggedIn: $isLoggedIn');

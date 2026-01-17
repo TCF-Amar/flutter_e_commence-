@@ -1,14 +1,22 @@
-/// DTO for login response
-class LoginResponseDto {
-  final String token;
+import 'package:flutter_commerce/features/auth/domain/entities/login_response.dart';
 
-  const LoginResponseDto({required this.token});
+/// DTO for login response
+class LoginResponseDto extends LoginResponse {
+  // final String token;
+
+  const LoginResponseDto({
+    required super.accessToken,
+    required super.refreshToken,
+  });
 
   factory LoginResponseDto.fromJson(Map<String, dynamic> json) {
-    return LoginResponseDto(token: json['token'] ?? '');
+    return LoginResponseDto(
+      accessToken: json['access_token'] ?? '',
+      refreshToken: json['refresh_token'] ?? '',
+    );
   }
 
   Map<String, dynamic> toJson() {
-    return {'token': token};
+    return {'access_token': accessToken, 'refresh_token': refreshToken};
   }
 }

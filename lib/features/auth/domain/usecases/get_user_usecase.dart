@@ -12,13 +12,13 @@ class GetUserUseCase {
   GetUserUseCase(this.repository);
 
   /// Execute get user by ID
-  Future<Either<Failure, User>> call(int userId) async {
-    if (userId <= 0) {
+  Future<Either<Failure, User>> call(String accessToken) async {
+    if (accessToken.isEmpty) {
       return Left(
         DioFailureMapper.map(DioException(requestOptions: RequestOptions())),
       );
     }
 
-    return await repository.getUserById(userId);
+    return await repository.getLoginUser(accessToken);
   }
 }

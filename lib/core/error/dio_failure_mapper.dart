@@ -52,6 +52,6 @@ class DioFailureMapper {
       return const NetworkFailure('Request cancelled');
     }
 
-    return const UnknownFailure();
+    return UnknownFailure("Something went wrong");
   }
 }

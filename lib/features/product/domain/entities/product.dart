@@ -1,43 +1,44 @@
-import 'package:flutter_commerce/features/product/domain/entities/rating.dart';
+import 'package:flutter_commerce/features/product/domain/entities/category.dart';
 
 /// Domain entity representing a product
 /// Pure Dart class with no external dependencies
 class Product {
   final int id;
   final String title;
+  final String slug;
   final double price;
   final String description;
-  final String category;
-  final String image;
-  final Rating rating;
+  final Category category;
+  final List<String> images;
+  // final Rating rating;
 
   const Product({
     required this.id,
     required this.title,
+    required this.slug,
     required this.price,
     required this.description,
     required this.category,
-    required this.image,
-    required this.rating,
+    required this.images,
   });
 
   Product copyWith({
     int? id,
     String? title,
+    String? slug,
     double? price,
     String? description,
-    String? category,
-    String? image,
-    Rating? rating,
+    Category? category,
+    List<String>? images,
   }) {
     return Product(
       id: id ?? this.id,
       title: title ?? this.title,
+      slug: slug ?? this.slug,
       price: price ?? this.price,
       description: description ?? this.description,
       category: category ?? this.category,
-      image: image ?? this.image,
-      rating: rating ?? this.rating,
+      images: images ?? this.images,
     );
   }
 
@@ -51,29 +52,5 @@ class Product {
   String get shortDescription {
     if (description.length <= 100) return description;
     return '${description.substring(0, 100)}...';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is Product &&
-        other.id == id &&
-        other.title == title &&
-        other.price == price &&
-        other.description == description &&
-        other.category == category &&
-        other.image == image &&
-        other.rating == rating;
-  }
-
-  @override
-  int get hashCode {
-    return id.hashCode ^
-        title.hashCode ^
-        price.hashCode ^
-        description.hashCode ^
-        category.hashCode ^
-        image.hashCode ^
-        rating.hashCode;
   }
 }
