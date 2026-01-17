@@ -12,6 +12,8 @@ class ApiEndpoints {
 
   static const String register = '$_auth/register';
 
+  static const String refreshToken = '$_auth/refresh-token';
+
   static const String users = _users;
 
   static String userById(int id) => '$_users/$id';

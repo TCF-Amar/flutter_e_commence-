@@ -51,4 +51,32 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
     throw Exception('Invalid user data format');
   }
+
+  @override
+  Future<Either<Failure, LoginResponseDto>> refreshToken(
+    String refreshToken,
+  ) async {
+    final response = await dio.post(
+      "/auth/refresh-token",
+      body: {"refreshToken": refreshToken},
+    );
+
+    if (response.data == null) {
+      throw Exception('Refresh token response is null');
+    }
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      if (response.data is Map<String, dynamic>) {
+        return Right(LoginResponseDto.fromJson(response.data));
+      } else {
+        return Left(ServerFailure('Invalid refresh token response format'));
+      }
+    } else {
+      return Left(
+        ServerFailure(
+          response.data['message']?.toString() ?? 'Token refresh failed',
+        ),
+      );
+    }
+  }
 }

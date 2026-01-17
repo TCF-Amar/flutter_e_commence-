@@ -4,16 +4,15 @@ import 'package:flutter_commerce/features/auth/domain/entities/login_credentials
 import 'package:flutter_commerce/features/auth/domain/entities/login_response.dart';
 import 'package:flutter_commerce/features/auth/domain/entities/user.dart';
 
-/// Abstract repository interface for authentication operations
-/// This defines the contract that data layer must implement
 abstract class AuthRepository {
   /// Authenticate user with credentials
   Future<Either<Failure, LoginResponse>> login(LoginCredentials credentials);
 
   /// Fetch user details by ID
-  /// Returns Either<Failure, User>
   Future<Either<Failure, User>> getLoginUser(String accessToken);
 
-  /// Logout current user
-  // Future<Either<Failure, void>> logout();
+  /// Refresh access token using refresh token
+  Future<Either<Failure, LoginResponse>> refreshToken(String refreshToken);
+
+  
 }

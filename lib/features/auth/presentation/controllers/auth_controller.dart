@@ -8,6 +8,7 @@ import 'package:flutter_commerce/features/auth/domain/entities/user.dart';
 import 'package:flutter_commerce/features/auth/domain/usecases/get_user_usecase.dart';
 import 'package:flutter_commerce/features/auth/domain/usecases/login_usecase.dart';
 import 'package:flutter_commerce/features/auth/domain/usecases/logout_usecase.dart';
+import 'package:flutter_commerce/features/auth/domain/usecases/refresh_token_usecase.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
@@ -16,6 +17,7 @@ class AuthController extends GetxController {
   final LoginUseCase loginUseCase;
   final GetUserUseCase getUserUseCase;
   final LogoutUseCase logoutUseCase;
+  final RefreshTokenUseCase refreshTokenUseCase;
 
   //* AppStorage
   final AppStorage storage;
@@ -24,6 +26,7 @@ class AuthController extends GetxController {
     required this.loginUseCase,
     required this.getUserUseCase,
     required this.logoutUseCase,
+    required this.refreshTokenUseCase,
     required this.storage,
   });
 
@@ -60,26 +63,19 @@ class AuthController extends GetxController {
     final accessToken = storage.accessToken.value;
     final refreshToken = storage.refreshToken.value;
     final isLoggedIn = storage.isLoggedIn.value;
-    debugPrint("token: $accessToken");
 
-    //* Only check expiration if we have a valid token
     if (accessToken.isNotEmpty && isLoggedIn) {
-      final isExpired = Jwt.isExpired(accessToken);
+      final isAccessExpired = Jwt.isExpired(accessToken);
       final isRefreshExpired = Jwt.isExpired(refreshToken);
 
-      debugPrint("Token expired: $isExpired");
-
-      if (isExpired || isRefreshExpired) {
-        debugPrint("Clearing expired session");
+      if (isRefreshExpired) {
         storage.clear();
+      } else if (isAccessExpired) {
+        await refreshAccessToken();
       } else {
         await fetchLoginUser(accessToken);
       }
     } else if (accessToken.isEmpty && refreshToken.isEmpty && isLoggedIn) {
-      /*
-      * If logged in but no token, clear the session
-      */
-      debugPrint("No token found, clearing session");
       storage.clear();
     }
   }
@@ -121,6 +117,33 @@ class AuthController extends GetxController {
         },
       );
     }
+  }
+
+  //* Refresh access token using refresh token
+  Future<void> refreshAccessToken() async {
+    final refreshToken = storage.refreshToken.value;
+
+    if (refreshToken.isEmpty) {
+      debugPrint("No refresh token available");
+      storage.clear();
+      return;
+    }
+
+    final result = await refreshTokenUseCase(refreshToken);
+    result.fold(
+      (failure) {
+        debugPrint("Token refresh failed: ${failure.message}");
+        // Refresh failed, clear session
+        storage.clear();
+      },
+      (loginResponse) {
+        debugPrint("Token refreshed successfully");
+        // Update tokens in storage
+        storage.setToken(loginResponse.accessToken, loginResponse.refreshToken);
+        // Fetch user with new token
+        fetchLoginUser(loginResponse.accessToken);
+      },
+    );
   }
 
   //* fetchLoginUser

@@ -131,4 +131,76 @@ void main() {
       );
     });
   });
+
+  group('AuthRepository - refreshToken', () {
+    test(
+      'should return LoginResponse when refresh token is successful',
+      () async {
+        // Arrange
+        const refreshToken = 'valid_refresh_token';
+
+        final mockResponse = LoginResponseDto(
+          accessToken: 'new_access_token',
+          refreshToken: 'new_refresh_token',
+        );
+
+        when(
+          () => mockDataSource.refreshToken(any()),
+        ).thenAnswer((_) async => Right(mockResponse));
+
+        // Act
+        final result = await repository.refreshToken(refreshToken);
+
+        // Assert
+        expect(result.isRight, true);
+        result.fold((l) => fail('Expected success'), (response) {
+          expect(response.accessToken, 'new_access_token');
+          expect(response.refreshToken, 'new_refresh_token');
+        });
+
+        verify(() => mockDataSource.refreshToken(refreshToken)).called(1);
+      },
+    );
+
+    test('should return Failure when refresh token fails', () async {
+      // Arrange
+      const refreshToken = 'invalid_token';
+
+      final failure = UnknownFailure('Refresh token expired');
+
+      when(
+        () => mockDataSource.refreshToken(any()),
+      ).thenAnswer((_) async => Left(failure));
+
+      // Act
+      final result = await repository.refreshToken(refreshToken);
+
+      // Assert
+      expect(result.isLeft, true);
+      result.fold((failure) {
+        expect(failure, isA<Failure>());
+      }, (r) => fail('Expected failure'));
+    });
+
+    test('should return Failure when data source throws exception', () async {
+      // Arrange
+      const refreshToken = 'valid_token';
+
+      when(
+        () => mockDataSource.refreshToken(any()),
+      ).thenThrow(Exception('Network error'));
+
+      // Act
+      final result = await repository.refreshToken(refreshToken);
+
+      // Assert
+      expect(result.isLeft, true);
+      result.fold(
+        (failure) => expect(failure, isA<Failure>()),
+        (r) => fail('Expected failure'),
+      );
+    });
+  });
+
+  
 }

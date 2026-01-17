@@ -7,10 +7,11 @@ import 'package:flutter_commerce/features/auth/data/models/user_model.dart';
 /// Abstract interface for auth remote data source
 abstract class AuthRemoteDataSource {
   /// Login with credentials
-  /// Returns Either with LoginResponseDto containing auth token or Failure
   Future<Either<Failure, LoginResponseDto>> login(LoginRequestDto request);
 
   /// Fetch user by ID
-  /// Returns UserModel
   Future<UserModel> getLoginuser(String accessToken);
+
+  /// Refresh access token using refresh token
+  Future<Either<Failure, LoginResponseDto>> refreshToken(String refreshToken);
 }

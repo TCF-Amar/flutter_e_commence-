@@ -17,16 +17,15 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this.remoteDataSource);
 
   @override
-  Future<Either<Failure, LoginResponse>> login(LoginCredentials credentials) async {
+  Future<Either<Failure, LoginResponse>> login(
+    LoginCredentials credentials,
+  ) async {
     try {
       final requestDto = LoginRequestDto.fromEntity(credentials);
       final result = await remoteDataSource.login(requestDto);
 
       // result is already Either<Failure, LoginResponseDto>
-      return result.fold(
-        (failure) => Left(failure),
-        (res) => Right(res),
-      );
+      return result.fold((failure) => Left(failure), (res) => Right(res));
     } on DioException catch (e) {
       return Left(DioFailureMapper.map(e));
     } catch (e) {
@@ -46,15 +45,21 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  // @override
-  // Future<Either<Failure, void>> logout() async {
-  //   try {
-  //     // Implement logout logic (e.g., clear tokens, call logout endpoint)
-  //     return Right(null);
-  //   } on DioException catch (e) {
-  //     return Left(DioFailureMapper.map(e));
-  //   } catch (e) {
-  //     return Left(UnknownFailure(e.toString()));
-  //   }
-  // }
+  @override
+  Future<Either<Failure, LoginResponse>> refreshToken(
+    String refreshToken,
+  ) async {
+    try {
+      final result = await remoteDataSource.refreshToken(refreshToken);
+
+      // result is already Either<Failure, LoginResponseDto>
+      return result.fold((failure) => Left(failure), (res) => Right(res));
+    } on DioException catch (e) {
+      return Left(DioFailureMapper.map(e));
+    } catch (e) {
+      return Left(UnknownFailure(e));
+    }
+  }
+
+  
 }
